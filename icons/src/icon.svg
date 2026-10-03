@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <!-- カード（灰の線、右上で途切れて点） -->
+  <path d="M74 18H34a12 12 0 00-12 12v68a12 12 0 0012 12h52a12 12 0 0012-12V44" stroke="#8C8C8C" stroke-width="7"/>
+  <circle cx="86" cy="18" r="3.6" fill="#8C8C8C"/>
+  <circle cx="96" cy="26" r="3.6" fill="#8C8C8C"/>
+  <!-- しおり（ラベンダーの塗り） -->
+  <path d="M40 30h24v40l-12-9-12 9z" fill="#D6B3FC"/>
+  <!-- 本文の線（水色・ピンク） -->
+  <path d="M40 84h34" stroke="#84F0FC" stroke-width="7"/>
+  <path d="M40 97h20" stroke="#FDB9E5" stroke-width="7"/>
+  <!-- スワイプの軌跡（ピンク→点） -->
+  <path d="M108 60c7 10 9 22 5 34" stroke="#FDB9E5" stroke-width="7"/>
+  <circle cx="110" cy="104" r="3.6" fill="#8C8C8C"/>
+  <!-- 橙のアクセント -->
+  <circle cx="74" cy="97" r="5" fill="#FBA94D"/>
+</svg>

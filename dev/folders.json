@@ -1,0 +1,41 @@
+{
+ "data": {
+  "viewer": {
+   "user_results": {
+    "result": {
+     "__typename": "User",
+     "bookmark_collections_slice": {
+      "items": [
+       {
+        "id": "1801000000000000001",
+        "name": "デザイン",
+        "media": null
+       },
+       {
+        "id": "1801000000000000002",
+        "name": "あとで読む長文",
+        "media": null
+       },
+       {
+        "id": "1801000000000000003",
+        "name": "Dev tips",
+        "media": null
+       },
+       {
+        "id": "1801000000000000004",
+        "name": "写真・カフェ",
+        "media": null
+       },
+       {
+        "id": "1801000000000000005",
+        "name": "Writing",
+        "media": null
+       }
+      ],
+      "slice_info": {}
+     }
+    }
+   }
+  }
+ }
+}
