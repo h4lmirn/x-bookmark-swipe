@@ -34,3 +34,6 @@ python3 -m http.server 8765
 
 ## 注意
 X の**非公開の Web API**（GraphQL）に依存しています。X 側の変更で、予告なく動かなくなることがあります。通信は x.com（と、queryId 探索のための X 公式の `abs.twimg.com` のスクリプト取得）以外には一切行いません。自己責任でお使いください。
+
+## ライセンス
+[MIT License](LICENSE)
