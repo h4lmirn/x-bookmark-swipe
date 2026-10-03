@@ -1,0 +1,5 @@
+{
+  "extName": { "message": "Bookmark Swipe" },
+  "extDescription": { "message": "Xのブックマークを、カードをスワイプして1枚ずつ整理します。" },
+  "actionTitle": { "message": "Bookmark Swipe: ブックマークをスワイプで整理" }
+}

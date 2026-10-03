@@ -24,12 +24,14 @@
     <li><code>?fail=0.4</code> 書き込みを40%の確率で失敗させる（再試行→カード復帰の確認）</li>
     <li><code>?batch=30</code> 一度に全件読み込む（既定は 10 件ずつ3ページを1.5秒遅延で読み込み）</li>
     <li><code>?nodelete=1</code> 外す機能が使えない状態（queryId 未発見）を再現</li>
+    <li><code>?lang=ja|en</code> 表示言語を固定（既定はブラウザの言語）</li>
     <li><code>?empty=1</code> 読み込み結果が空の場合</li>
   </ul>
   <pre id="log" style="font-size:12px;opacity:.7;white-space:pre-wrap"></pre>
   <script src="src/parse.js"></script>
   <script src="src/physics.js"></script>
   <script src="src/queue.js"></script>
+  <script src="src/i18n.js"></script>
   <script src="src/overlay.js"></script>
   <script src="dev.js"></script>
 </body>

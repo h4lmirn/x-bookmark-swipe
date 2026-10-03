@@ -4,6 +4,7 @@
   'use strict';
   var XBS = (G.XBS = G.XBS || {});
   var tween = XBS.physics.tween, spring = XBS.physics.spring, ease = XBS.physics.ease;
+  var I18N = XBS.i18n, t = I18N.t, fmtCount = I18N.fmtCount, relTime = I18N.relTime, fmtDuration = I18N.fmtDuration;
 
   /* ------------------------------------------------------------------ icons */
   function ic(p, w) {
@@ -22,6 +23,8 @@
     later: dot(['M12 3.5a8.5 8.5 0 108.5 8.5A8.5 8.5 0 0012 3.5', 'M12 7.5v5l3.5 2']),
     folder: dot(['M3.5 17.5v-10A1.5 1.5 0 015 6h4l2 2h8a1.5 1.5 0 011.5 1.5v8A1.5 1.5 0 0119 19H5']),
     undo: dot(['M9 14L4 9l5-5', 'M4 9h10.5a5.5 5.5 0 010 11H10']),
+    bookmark: dot(['M8 4.5h8a1 1 0 011 1v14l-5-3.5-5 3.5V5.5A1 1 0 018 4.5'], 24),
+    stack: dot(['M5 18.5v-9A1.5 1.5 0 016.5 8h11A1.5 1.5 0 0119 9.5v9a1.5 1.5 0 01-1.5 1.5h-11A1.5 1.5 0 015 18.5', 'M8 4.5h8'], 20),
     gear: ic('<path d="M4 7h9M17 7h3M4 17h3M11 17h9"/><circle cx="15" cy="7" r="2"/><circle cx="9" cy="17" r="2"/>'),
     reply: ic('<path d="M20 12a8 8 0 01-11.6 7.1L4 20l1-4.2A8 8 0 1120 12z"/>', 16),
     repost: ic('<path d="M17 4l3 3-3 3M20 7H8a4 4 0 00-4 4v1M7 20l-3-3 3-3M4 17h12a4 4 0 004-4v-1"/>', 16),
@@ -48,15 +51,15 @@
     ':focus-visible{outline:2px solid var(--folder);outline-offset:3px;border-radius:10px}',
     /* header */
     '.head{position:relative;display:grid;grid-template-columns:1fr auto 1fr;align-items:center;padding:12px 20px 14px;z-index:5}',
-    '.h-left{font-size:13px;color:var(--sub);letter-spacing:.04em}',
+    '.h-left{display:flex;align-items:center;color:var(--sub)}',
     '.h-mid{text-align:center;line-height:1}',
     '.count{display:inline-grid;font-size:56px;font-weight:700;letter-spacing:-.02em;font-variant-numeric:tabular-nums;line-height:1.05;overflow:hidden;padding:0 4px;height:1.1em}',
     '.count>span{grid-area:1/1;text-align:center;will-change:transform,opacity}',
     '.count-wrap{display:inline-flex;align-items:flex-start;gap:2px}',
     '.plus{font-size:20px;color:var(--sub);font-weight:600;margin-top:10px}',
-    '.cap{display:block;font-size:11px;color:var(--sub);margin-top:2px;letter-spacing:.1em}',
+    '.cap{display:flex;justify-content:center;color:var(--sub);margin-top:4px}',
     '.h-right{display:flex;justify-content:flex-end;align-items:center;gap:6px;font-size:13px;color:var(--sub);font-variant-numeric:tabular-nums}',
-    '.results{margin-right:8px;white-space:nowrap}.results b{color:var(--ink);font-weight:600}',
+    '.results{margin-right:8px;white-space:nowrap;font-family:-apple-system,"SF Pro Text",system-ui,sans-serif}.results b{color:var(--ink);font-weight:600}.results .em{margin-right:3px;font-family:"Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif}.results .gap{display:inline-block;width:.7em}',
     '.ibtn{width:36px;height:36px;border-radius:50%;display:grid;place-items:center;color:var(--sub);transition:transform .15s,opacity .15s}',
     '.ibtn:hover{color:var(--ink)}.ibtn:active{transform:scale(.9)}',
     '.endbtn{width:auto;display:inline-flex;align-items:center;gap:4px;padding:0 12px 0 8px;border-radius:999px;font-size:13px;font-weight:600;letter-spacing:.06em}.endbtn svg{width:18px;height:18px}.endbtn:hover{background:var(--chip)}',
@@ -70,11 +73,13 @@
     '.face{position:relative;flex:1;min-height:0;display:flex;flex-direction:column;border-radius:20px;overflow:hidden;padding:18px 20px 12px}',
     '.melt{position:absolute;inset:0;background:var(--remove);opacity:0;pointer-events:none;z-index:3}',
     '.veil{position:absolute;inset:0;border-radius:20px;background:var(--desk);opacity:0;pointer-events:none;z-index:6}',
-    '.stamp{position:absolute;z-index:4;opacity:0;pointer-events:none;font-weight:800;font-size:26px;line-height:1;letter-spacing:.08em;border:3px solid currentColor;border-radius:10px;padding:6px 12px;background:color-mix(in srgb,var(--card) 70%,transparent)}',
-    '.stamp[data-d=left]{color:var(--remove);top:22px;right:18px;transform:rotate(12deg)}',
-    '.stamp[data-d=right]{color:var(--keep);top:22px;left:18px;transform:rotate(-12deg)}',
+    '.stamp{position:absolute;z-index:4;opacity:0;pointer-events:none;width:104px;height:104px;border-radius:50%;border:3px solid currentColor;display:grid;place-items:center;background:color-mix(in srgb,var(--card) 90%,transparent);box-shadow:0 2px 10px rgba(110,80,150,.12)}',
+    '.stamp::before{content:"";position:absolute;inset:4px;border-radius:50%;border:1.5px solid currentColor}',
+    '.stamp .em{position:relative;font-size:56px;line-height:1;opacity:.92;font-family:"Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif}',
+    '.stamp[data-d=left]{color:var(--remove);top:64px;right:18px;transform:rotate(12deg)}',
+    '.stamp[data-d=right]{color:var(--keep);top:64px;left:18px;transform:rotate(-12deg)}',
     '.stamp[data-d=up]{color:var(--folder);bottom:46px;left:50%;margin-left:-52px;transform:rotate(-4deg)}',
-    '.stamp[data-d=down]{color:var(--later);top:22px;left:50%;margin-left:-40px;transform:rotate(4deg)}',
+    '.stamp[data-d=down]{color:var(--later);top:64px;left:50%;margin-left:-52px;transform:rotate(4deg)}',
     '.author{display:flex;align-items:center;gap:10px;flex:none;margin-bottom:10px}',
     '.av{width:36px;height:36px;border-radius:50%;background:var(--chip);object-fit:cover;flex:none}',
     '.who{min-width:0;line-height:1.3}',
@@ -129,7 +134,8 @@
     /* toast */
     '.toast{position:absolute;z-index:20;top:106px;left:0;right:0;margin:0 auto;width:fit-content;max-width:calc(100vw - 24px);display:flex;align-items:center;gap:14px;padding:9px 10px 9px 18px;border-radius:999px;background:var(--toast-bg);color:var(--toast-ink);font-size:14px;font-weight:500;line-height:1.4;box-shadow:0 8px 30px rgba(0,0,0,.25);opacity:0;transform:translateY(-14px) scale(.92);pointer-events:none;transition:opacity .2s,transform .32s cubic-bezier(.2,1.1,.3,1)}',
     '.toast.show{opacity:1;transform:none;pointer-events:auto}',
-    '.toast button{font-weight:700;font-size:13px;padding:5px 12px;border-radius:999px;background:color-mix(in srgb,var(--toast-ink) 16%,transparent)}',
+    '.toast button{display:inline-flex;align-items:center;gap:5px;font-weight:700;font-size:13px;padding:5px 12px 5px 9px;border-radius:999px;background:color-mix(in srgb,var(--toast-ink) 16%,transparent)}',
+    '.toast .t-text{display:inline-flex;align-items:center;gap:6px}.toast .t-em{font-size:22px;line-height:1;font-family:"Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif}',
     '.toast button[hidden]{display:none}',
     '.toast .t-text{padding-right:2px}',
     '.toast.pulse{animation:none}',
@@ -138,12 +144,12 @@
     '.scrim.show{opacity:1;pointer-events:auto}',
     '.sheet{position:absolute;z-index:31;left:0;right:0;bottom:0;margin:0 auto;width:min(560px,100%);padding:18px 18px calc(20px + env(safe-area-inset-bottom,0px));background:var(--card);border-radius:24px 24px 0 0;box-shadow:0 -10px 40px rgba(0,0,0,.18);transform:translateY(105%);transition:transform .34s cubic-bezier(.2,.9,.3,1)}',
     '.sheet.show{transform:none}',
-    '.sheet h2{margin:0 0 12px;font-size:14px;font-weight:600;color:var(--sub);letter-spacing:.04em}',
+    '.sheet h2{margin:0 0 12px;font-size:14px;font-weight:600;color:var(--sub);letter-spacing:.04em;display:flex;align-items:center;gap:8px}.sheet h2 svg{color:var(--folder)}',
     '.chips{display:flex;flex-wrap:wrap;gap:8px;max-height:30vh;overflow-y:auto}',
     '.chip{display:inline-flex;align-items:center;gap:8px;padding:10px 12px 10px 12px;border-radius:14px;background:var(--chip);color:var(--ink);font-size:15px;font-weight:500;transition:transform .15s}',
     '.chip svg{color:var(--folder)}.chip:active{transform:scale(.95)}',
     '.chip kbd{font:600 11px/1 ui-monospace,SFMono-Regular,Menlo,monospace;color:var(--sub);border:1px solid var(--line);border-radius:5px;padding:3px 5px}',
-    '.sheet .esc{margin-top:12px;font-size:12px;color:var(--sub)}',
+    '.sheet .esc{margin-top:12px;font-size:12px;color:var(--sub);letter-spacing:.06em}',
     /* settings */
     '.settings{position:absolute;z-index:40;top:60px;right:14px;width:min(320px,calc(100vw - 28px));background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px;box-shadow:0 12px 40px rgba(0,0,0,.2);font-size:14px;line-height:1.5;opacity:0;transform:translateY(-6px) scale(.97);transform-origin:top right;pointer-events:none;transition:opacity .16s,transform .2s cubic-bezier(.2,.9,.3,1)}',
     '.settings.show{opacity:1;transform:none;pointer-events:auto}',
@@ -163,9 +169,9 @@
     '.done h1{margin:8px 0 0;font-size:32px;font-weight:700;letter-spacing:.02em}',
     '.done p{margin:0;color:var(--sub);font-size:15px;font-variant-numeric:tabular-nums}',
     '.done .stats{display:flex;gap:26px;margin:14px 0 6px;font-variant-numeric:tabular-nums}',
-    '.done .stats div{display:flex;flex-direction:column;align-items:center;gap:2px}',
+    '.done .stats div{display:flex;align-items:center;gap:8px}',
     '.done .stats b{font-size:34px;font-weight:700;line-height:1.1;color:var(--ink)}',
-    '.done .stats span{font-size:12px;color:var(--sub)}',
+    '.done .stats .em{font-size:30px;line-height:1;font-family:"Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif}',
     '.done .btns{display:flex;gap:10px;margin-top:18px}',
     '.pill{padding:11px 22px;border-radius:999px;background:var(--ink);color:var(--desk);font-size:15px;font-weight:600}',
     '.pill.ghost{background:var(--chip);color:var(--ink)}',
@@ -174,33 +180,33 @@
     '@media (prefers-reduced-motion:reduce){.tint,.bar>i,.toast,.sheet,.scrim,.settings,.done,.cbtn,.ibtn,.chip{transition-duration:.01ms!important}.skeleton{animation:none}.done .ring,.done .tick{animation-duration:.01ms!important}}'
   ].join('\n');
 
-  var TEMPLATE = [
-    '<div class="root" tabindex="-1" role="dialog" aria-modal="true" aria-label="ブックマークをスワイプで整理">',
+  function template() { return [
+    '<div class="root" tabindex="-1" role="dialog" aria-modal="true" aria-label="' + t('dialog') + '" lang="' + I18N.lang + '">',
     '<div class="noise"></div>',
     '<i class="tint" data-d="left"></i><i class="tint" data-d="right"></i><i class="tint" data-d="up"></i><i class="tint" data-d="down"></i>',
     '<header class="head">',
-    '<div class="h-left">ブックマーク</div>',
-    '<div class="h-mid"><div class="count-wrap"><div class="count" aria-hidden="true"></div><span class="plus" hidden>+</span></div><span class="cap">残り</span><span class="sr count-sr" aria-live="off"></span></div>',
+    '<div class="h-left" role="img" aria-label="' + t('bookmarks') + '">' + ICON.bookmark + '</div>',
+    '<div class="h-mid"><div class="count-wrap"><div class="count" aria-hidden="true"></div><span class="plus" hidden>+</span></div><span class="cap" aria-hidden="true">' + ICON.stack + '</span><span class="sr count-sr" aria-live="off"></span></div>',
     '<div class="h-right"><span class="results"></span>',
-    '<button class="ibtn" data-b="settings" aria-label="設定" aria-haspopup="dialog">' + ICON.gear + '</button>',
-    '<button class="ibtn endbtn" data-b="close" aria-label="おわり（Esc）">' + ICON.close + '<span>おわり</span></button></div>',
+    '<button class="ibtn" data-b="settings" aria-label="' + t('settings') + '" aria-haspopup="dialog">' + ICON.gear + '</button>',
+    '<button class="ibtn endbtn" data-b="close" aria-label="' + t('doneLabel') + '">' + ICON.close + '<span>' + t('done') + '</span></button></div>',
     '<div class="bar"><i></i></div>',
     '</header>',
-    '<main class="stage"><div class="skeleton" hidden aria-label="読み込み中" role="status"><div class="sk" style="height:36px;width:55%"></div><div class="sk" style="height:16px"></div><div class="sk" style="height:16px;width:90%"></div><div class="sk" style="height:16px;width:70%"></div><div class="sk" style="flex:1"></div></div></main>',
-    '<div class="toast" role="status" aria-live="polite"><span class="t-text"></span><button type="button" class="t-undo" aria-label="元に戻す">元に戻す</button></div>',
+    '<main class="stage"><div class="skeleton" hidden aria-label="' + t('loading') + '" role="status"><div class="sk" style="height:36px;width:55%"></div><div class="sk" style="height:16px"></div><div class="sk" style="height:16px;width:90%"></div><div class="sk" style="height:16px;width:70%"></div><div class="sk" style="flex:1"></div></div></main>',
+    '<div class="toast" role="status" aria-live="polite"><span class="t-text"></span><button type="button" class="t-undo" aria-label="' + t('undo') + '">' + ICON.undo.replace('width="24" height="24"', 'width="14" height="14"') + '<span>' + t('undo') + '</span></button></div>',
     '<footer class="actions">',
-    '<div class="act"><button class="cbtn" data-k="remove" aria-label="外す（ブックマークを解除）">' + ICON.remove + '</button><span class="hint">← / D</span></div>',
-    '<div class="act"><button class="cbtn" data-k="later" aria-label="あとで（山札の最後に回す）">' + ICON.later + '</button><span class="hint">↓ / S</span></div>',
-    '<div class="act"><button class="cbtn" data-k="folder" aria-label="フォルダへ入れる">' + ICON.folder + '</button><span class="hint">↑ / F</span></div>',
-    '<div class="act"><button class="cbtn" data-k="keep" aria-label="残す（確認済みにする）">' + ICON.keep + '</button><span class="hint">→ / K</span></div>',
-    '<div class="act"><button class="cbtn small" data-k="undo" aria-label="元に戻す">' + ICON.undo + '</button><span class="hint">Z</span></div>',
+    '<div class="act"><button class="cbtn" data-k="remove" aria-label="' + t('removeLabel') + '">' + ICON.remove + '</button><span class="hint">← / D</span></div>',
+    '<div class="act"><button class="cbtn" data-k="later" aria-label="' + t('laterLabel') + '">' + ICON.later + '</button><span class="hint">↓ / S</span></div>',
+    '<div class="act"><button class="cbtn" data-k="folder" aria-label="' + t('folderLabel') + '">' + ICON.folder + '</button><span class="hint">↑ / F</span></div>',
+    '<div class="act"><button class="cbtn" data-k="keep" aria-label="' + t('keepLabel') + '">' + ICON.keep + '</button><span class="hint">→ / K</span></div>',
+    '<div class="act"><button class="cbtn small" data-k="undo" aria-label="' + t('undo') + '">' + ICON.undo + '</button><span class="hint">Z</span></div>',
     '</footer>',
     '<div class="scrim"></div>',
-    '<div class="sheet" role="dialog" aria-label="フォルダを選択" aria-hidden="true"><h2>フォルダに入れる</h2><div class="chips"></div><div class="esc">数字キー 1〜9 で選択 ・ Esc でキャンセル</div></div>',
-    '<div class="settings" role="dialog" aria-label="設定" aria-hidden="true"><label><input type="checkbox" class="s-all"> 確認済みもすべて表示</label><div class="note">オフのとき、「残す」「フォルダへ」にした投稿は次回から出ません。</div><button class="reset" type="button">記録をリセット（<span class="s-n">0</span>件）</button></div>',
-    '<section class="done" role="status" aria-live="polite" aria-hidden="true"><div class="chk">' + ICON.check + '</div><h1>整理完了</h1><p class="d-sub"></p><div class="stats"></div><p class="d-time"></p><div class="btns"><button class="pill ghost" data-b="undo2">元に戻す</button><button class="pill" data-b="close">閉じる</button></div></section>',
+    '<div class="sheet" role="dialog" aria-label="' + t('folderSheetLabel') + '" aria-hidden="true"><h2>' + ICON.folder.replace('width="24" height="24"', 'width="20" height="20"') + '<span>' + t('folderTitle') + '</span></h2><div class="chips"></div><div class="esc" aria-label="' + t('folderHint') + '">1\u20139 \u00b7 Esc</div></div>',
+    '<div class="settings" role="dialog" aria-label="' + t('settings') + '" aria-hidden="true"><label><input type="checkbox" class="s-all"> ' + t('showAll') + '</label><div class="note">' + t('showAllNote') + '</div><button class="reset" type="button">' + t('resetRec', { n: '<span class="s-n">0</span>' }) + '</button></div>',
+    '<section class="done" role="status" aria-live="polite" aria-hidden="true"><div class="chk">' + ICON.check + '</div><h1>' + t('doneTitle') + '</h1><p class="d-sub"></p><div class="stats"></div><p class="d-time"></p><div class="btns"><button class="pill ghost" data-b="undo2">' + t('undo') + '</button><button class="pill" data-b="close">' + t('closePill') + '</button></div></section>',
     '</div>'
-  ].join('');
+  ].join(''); }
 
   /* --------------------------------------------------------------- helpers */
   function clamp(v, a, b) { return Math.max(a, Math.min(b, v)); }
@@ -209,25 +215,6 @@
     if (cls) e.className = cls;
     if (text != null) e.textContent = text;
     return e;
-  }
-  function fmtCount(n) {
-    if (!n) return '0';
-    if (n >= 10000) return (n / 10000).toFixed(n >= 100000 ? 0 : 1).replace(/\.0$/, '') + '万';
-    return n.toLocaleString('ja-JP');
-  }
-  function relTime(ts) {
-    if (!ts) return '';
-    var s = (Date.now() - ts) / 1000;
-    if (s < 60) return 'たった今';
-    if (s < 3600) return Math.floor(s / 60) + '分';
-    if (s < 86400) return Math.floor(s / 3600) + '時間';
-    if (s < 7 * 86400) return Math.floor(s / 86400) + '日';
-    var d = new Date(ts), n = new Date();
-    return (d.getFullYear() === n.getFullYear() ? '' : d.getFullYear() + '年') + (d.getMonth() + 1) + '月' + d.getDate() + '日';
-  }
-  function fmtDuration(ms) {
-    var s = Math.max(1, Math.round(ms / 1000)), m = Math.floor(s / 60);
-    return m ? m + '分' + (s % 60) + '秒' : s + '秒';
   }
   var TOKEN = /(https?:\/\/[^\s]+)|(@[A-Za-z0-9_]{1,15})|(#[\p{L}\p{N}_]+)/gu;
   function shortUrl(u) {
@@ -252,10 +239,10 @@
   }
 
   var DIRS = {
-    left: { label: '外す', kind: 'remove' },
-    right: { label: '残す', kind: 'keep' },
-    up: { label: 'フォルダ', kind: 'folder' },
-    down: { label: 'あとで', kind: 'later' }
+    left: { emoji: '\uD83D\uDC4B', kind: 'remove' },
+    right: { emoji: '\uD83E\uDD1D', kind: 'keep' },
+    up: { emoji: '\uD83D\uDCC1', kind: 'folder' },
+    down: { emoji: '\u23F3', kind: 'later' }
   };
   var KIND_DIR = { remove: 'left', keep: 'right', folder: 'up', later: 'down' };
   var STAMP_ROT = { left: 12, right: -12, up: -4, down: 4 };
@@ -267,7 +254,7 @@
     host.id = 'xbs-overlay-host';
     host.style.cssText = 'all:initial;position:fixed;inset:0;z-index:2147483647;';
     var sh = host.attachShadow({ mode: 'open' });
-    sh.innerHTML = '<style>' + CSS + '</style>' + TEMPLATE;
+    sh.innerHTML = '<style>' + CSS + '</style>' + template();
     (opts.container || document.body).appendChild(host);
 
     function $(s) { return sh.querySelector(s); }
@@ -341,14 +328,14 @@
     function buildCard(item) {
       var c = el('div', 'card');
       c.setAttribute('role', 'group');
-      c.setAttribute('aria-label', item.name + ' の投稿');
+      c.setAttribute('aria-label', t('cardLabel', { name: item.name }));
       var lift = el('div', 'lift'); c.appendChild(lift);
       var face = el('div', 'face'); c.appendChild(face);
       var melt = el('div', 'melt'); face.appendChild(melt);
       var veil = el('div', 'veil'); c.appendChild(veil);
       var stamps = {};
       Object.keys(DIRS).forEach(function (d) {
-        var s = el('div', 'stamp', DIRS[d].label); s.dataset.d = d; face.appendChild(s); stamps[d] = s;
+        var s = el('div', 'stamp'); s.setAttribute('aria-hidden', 'true'); s.appendChild(el('span', 'em', DIRS[d].emoji)); s.dataset.d = d; face.appendChild(s); stamps[d] = s;
       });
       var au = el('div', 'author');
       var av = el('img', 'av'); av.src = item.avatar || ''; av.alt = ''; av.draggable = false;
@@ -365,7 +352,7 @@
       if (item.text) {
         textEl = textBlock(item.text, 'clamp');
         body.appendChild(textEl);
-        more = el('button', 'more', '続きを読む'); more.type = 'button'; more.hidden = true; more.dataset.nodrag = '1';
+        more = el('button', 'more', t('more')); more.type = 'button'; more.hidden = true; more.dataset.nodrag = '1';
         more.setAttribute('aria-expanded', 'false');
         body.appendChild(more);
       }
@@ -390,12 +377,12 @@
       var foot = el('div', 'foot');
       [['reply', item.counts.reply], ['repost', item.counts.repost], ['like', item.counts.like]].forEach(function (x) {
         var m = el('span', 'm'); m.innerHTML = ICON[x[0]]; m.appendChild(el('span', '', fmtCount(x[1])));
-        m.setAttribute('aria-label', { reply: '返信', repost: 'リポスト', like: 'いいね' }[x[0]] + ' ' + x[1]);
+        m.setAttribute('aria-label', t(x[0]) + ' ' + x[1]);
         foot.appendChild(m);
       });
       var open = el('a', 'open'); open.href = item.url; open.target = '_blank'; open.rel = 'noopener noreferrer';
-      open.dataset.nodrag = '1'; open.setAttribute('aria-label', 'Xで開く（新しいタブ）');
-      open.innerHTML = 'Xで開く ' + ICON.ext; foot.appendChild(open);
+      open.dataset.nodrag = '1'; open.setAttribute('aria-label', t('openXLabel'));
+      open.innerHTML = t('openX') + ' ' + ICON.ext; foot.appendChild(open);
       face.appendChild(foot);
 
       var card = {
@@ -407,7 +394,7 @@
         more.addEventListener('click', function () {
           var ex = body.classList.toggle('expanded');
           textEl.classList.toggle('clamp', !ex);
-          more.textContent = ex ? '閉じる' : '続きを読む';
+          more.textContent = ex ? t('less') : t('more');
           more.setAttribute('aria-expanded', String(ex));
         });
         card.measure = function () {
@@ -547,7 +534,7 @@
       if (curCount === txt) return;
       var old = countEl.lastElementChild, span = el('span', '', txt);
       countEl.appendChild(span);
-      countSr.textContent = '残り ' + txt + ' 件';
+      countSr.textContent = t('remaining', { n: txt });
       if (old && !reduced() && curCount !== null) {
         var up = dir !== 'down';
         Array.prototype.slice.call(countEl.children).forEach(function (c) { if (c !== old && c !== span) c.remove(); });
@@ -567,11 +554,12 @@
       lastRemaining = remaining;
       plusEl.hidden = finished;
       var handled = counts.removed + counts.kept + counts.foldered;
-      resultsEl.innerHTML = '外した <b>' + counts.removed + '</b> ・ 残した <b>' + (counts.kept + counts.foldered) + '</b>';
+      var kk = counts.kept + counts.foldered;
+      resultsEl.innerHTML = '<span aria-hidden="true"><span class="em">' + DIRS.left.emoji + '</span><b>' + counts.removed + '</b><span class="gap"></span><span class="em">' + DIRS.right.emoji + '</span><b>' + kk + '</b></span><span class="sr">' + t('results', { a: counts.removed, b: kk }) + '</span>';
       var tot = handled + remaining;
       barEl.style.transform = 'scaleX(' + (tot ? handled / tot : 0).toFixed(4) + ')';
-      setDisabled(btn.remove, !caps.delete, '外す機能が使えません');
-      setDisabled(btn.folder, !folderEnabled(), foldersReady ? (folders.length ? '' : 'フォルダがありません') : 'フォルダを読み込み中');
+      setDisabled(btn.remove, !caps.delete, t('noDelete'));
+      setDisabled(btn.folder, !folderEnabled(), foldersReady ? (folders.length ? '' : t('noFolders')) : t('foldersLoading'));
       setDisabled(btn.undo, history.length === 0);
       setDisabled(btn.keep, false); setDisabled(btn.later, false);
       toastUndo.disabled = history.length === 0;
@@ -586,7 +574,14 @@
     /* -------------------------------------------------------------- toast */
     function toast(text, o) {
       o = o || {};
-      toastText.textContent = text;
+      toastText.textContent = '';
+      if (o.emoji || o.icon) {
+        var vis = el('span', 't-em'); vis.setAttribute('aria-hidden', 'true');
+        if (o.icon) vis.innerHTML = o.icon; else vis.textContent = o.emoji;
+        toastText.appendChild(vis);
+        if (o.label) { var lb = el('span', '', o.label); lb.setAttribute('aria-hidden', 'true'); toastText.appendChild(lb); }
+        toastText.appendChild(el('span', 'sr', text));
+      } else toastText.textContent = text;
       toastUndo.hidden = !o.undo;
       toastEl.classList.add('show');
       toastEl.setAttribute('aria-hidden', 'false');
@@ -686,8 +681,8 @@
 
     /* ----------------------------------------------------------- actions */
     function reason(what) {
-      if (what === 'delete') return '外すために必要な情報をXから取得できませんでした。ページを再読み込みしてください。';
-      if (what === 'folder') return folders.length || !foldersReady ? 'フォルダ操作に必要な情報を取得できませんでした。' : 'フォルダがありません。';
+      if (what === 'delete') return t('needDelete');
+      if (what === 'folder') return folders.length || !foldersReady ? t('needFolder') : t('noFoldersDot');
       return '';
     }
     function act(kind, o) {
@@ -711,33 +706,33 @@
       deck.shift();
       cards.delete(item.id);
       var entry = { kind: kind, item: item, op: null, pose: null, folder: o.folder || null };
-      var msg;
+      var msg, em, lab;
       if (kind === 'remove') {
         counts.removed++; sessionDone.add(item.id);
         entry.op = queue.add({ kind: 'remove', tweetId: item.id });
-        msg = '外しました';
+        msg = t('msgRemoved'); em = DIRS.left.emoji;
       } else if (kind === 'keep') {
         counts.kept++; sessionDone.add(item.id); reviewed.add(item.id); adapter.setReviewed(item.id, true);
-        msg = '残しました';
+        msg = t('msgKept'); em = DIRS.right.emoji;
       } else if (kind === 'folder') {
         counts.foldered++; sessionDone.add(item.id); reviewed.add(item.id); adapter.setReviewed(item.id, true);
         entry.op = queue.add({ kind: 'folder', tweetId: item.id, folderId: o.folder.id, folderName: o.folder.name });
-        msg = '「' + o.folder.name + '」に入れました';
+        msg = t('msgFolder', { name: o.folder.name }); em = DIRS.up.emoji; lab = o.folder.name;
       } else {
         counts.later++;
         insertRandom(item);   // 池のランダムな位置に戻す
-        msg = 'あとで見ます';
+        msg = t('msgLater'); em = DIRS.down.emoji;
       }
       history.push(entry); if (history.length > 300) history.shift();
       entry.pose = fly(card, kind, o);
       sync();
-      toast(msg, { undo: true });
+      toast(msg, { undo: true, emoji: em, label: lab });
     }
 
     function undo() {
       if (destroyed || ui.modal === 'folder') return false;
       var e = history.pop();
-      if (!e) { toast('戻せる操作はありません', { ms: 1800 }); return false; }
+      if (!e) { toast(t('msgNothingToUndo'), { ms: 1800, icon: ICON.undo.replace('width="24" height="24"', 'width="20" height="20"') }); return false; }
       finishLeaving();
       var item = e.item;
       if (e.kind === 'remove') {
@@ -754,7 +749,7 @@
       }
       if (ui.done) hideDone();
       bringBack(item, e.pose);
-      toast('元に戻しました', { undo: history.length > 0 });
+      toast(t('msgUndone'), { undo: history.length > 0, icon: ICON.undo.replace('width="24" height="24"', 'width="20" height="20"') });
       return true;
     }
     function enqueueInverse(op) {
@@ -787,7 +782,7 @@
     }
     function onCommitFail(op, err) {
       if (destroyed) return;
-      if (op.inverse) { toast('元に戻す操作を送信できませんでした', { ms: 4500 }); return; }
+      if (op.inverse) { toast(t('msgUndoFailed'), { ms: 4500 }); return; }
       var ix = -1;
       for (var i = history.length - 1; i >= 0; i--) if (history[i].op === op) { ix = i; break; }
       if (ix < 0) return;
@@ -797,7 +792,7 @@
       sessionDone.delete(item.id);
       finishLeaving();
       bringBack(item, e.pose);
-      toast((e.kind === 'remove' ? '外せませんでした' : 'フォルダに入れられませんでした') + '。カードを戻しました' + (err && err.message ? '（' + err.message + '）' : ''), { ms: 6000 });
+      toast((e.kind === 'remove' ? t('msgRemoveFailed') : t('msgFolderFailed')) + (I18N.lang === 'ja' ? '。' : '. ') + t('msgCardBack') + (err && err.message ? (I18N.lang === 'ja' ? '（' + err.message + '）' : ' (' + err.message + ')') : ''), { ms: 6000 });
     }
 
     /* ------------------------------------------------------ folder sheet */
@@ -810,7 +805,7 @@
         b.innerHTML = ICON.folder.replace('width="24" height="24"', 'width="20" height="20"');
         b.appendChild(el('span', '', f.name));
         if (i < 9) b.appendChild(el('kbd', '', String(i + 1)));
-        b.setAttribute('aria-label', f.name + 'に入れる' + (i < 9 ? '（' + (i + 1) + '）' : ''));
+        b.setAttribute('aria-label', i < 9 ? t('folderChipN', { name: f.name, n: i + 1 }) : t('folderChip', { name: f.name }));
         b.addEventListener('click', function () { chooseFolder(i); });
         chipsEl.appendChild(b); return b;
       });
@@ -856,14 +851,17 @@
       ui.done = true;
       var handled = counts.removed + counts.kept + counts.foldered;
       doneEl.querySelector('.d-sub').textContent = stalled && !all.length
-        ? 'ブックマークを取得できませんでした。ページを再読み込みしてから、もう一度お試しください。'
-        : handled ? 'ブックマークを ' + handled + ' 件、整理しました。'
-          : all.length ? '新しく確認するブックマークはありません。（設定から確認済みも表示できます）' : 'ブックマークがありません。';
+        ? t('stalled')
+        : handled ? t('handled', { n: handled })
+          : all.length ? t('nothingNew') : t('noBookmarks');
       var st = doneEl.querySelector('.stats'); st.textContent = '';
-      [['外した', counts.removed], ['残した', counts.kept], ['フォルダへ', counts.foldered]].forEach(function (x) {
-        var d = el('div'); d.appendChild(el('b', '', String(x[1]))); d.appendChild(el('span', '', x[0])); st.appendChild(d);
+      [['left', counts.removed, 'removed'], ['right', counts.kept, 'kept'], ['up', counts.foldered, 'foldered']].forEach(function (x) {
+        var d = el('div'); d.title = t(x[2]);
+        var e = el('span', 'em', DIRS[x[0]].emoji); e.setAttribute('aria-hidden', 'true'); d.appendChild(e);
+        d.appendChild(el('b', '', String(x[1]))); d.appendChild(el('span', 'sr', t(x[2]))); st.appendChild(d);
       });
-      doneEl.querySelector('.d-time').textContent = handled ? 'かかった時間 ' + fmtDuration(Date.now() - t0) : '';
+      doneEl.querySelector('.d-time').setAttribute('aria-label', t('elapsed', { t: fmtDuration(Date.now() - t0) }));
+      doneEl.querySelector('.d-time').textContent = handled ? '\u23F1 ' + fmtDuration(Date.now() - t0) : '';
       doneEl.querySelector('[data-b=undo2]').hidden = history.length === 0;
       doneEl.classList.add('show'); doneEl.setAttribute('aria-hidden', 'false');
       hideToast();
@@ -890,7 +888,7 @@
     });
     sh.querySelector('.reset').addEventListener('click', function () {
       reviewed.clear(); adapter.clearReviewed(); sh.querySelector('.s-n').textContent = '0';
-      rebuildDeck(); toast('確認済みの記録をリセットしました', { ms: 2500 });
+      rebuildDeck(); toast(t('resetDone'), { ms: 2500 });
     });
 
     /* ---------------------------------------------------------- pointer */
@@ -1062,7 +1060,7 @@
         onItems: addItems,
         onDone: function (info) {
           finished = true; stalled = !!(info && info.stalled);
-          if (info && info.stalled) toast('ブックマークを取得できませんでした。ページを再読み込みしてください。', { ms: 6000 });
+          if (info && info.stalled) toast(t('stalledToast'), { ms: 6000 });
           updateChrome();
         }
       });

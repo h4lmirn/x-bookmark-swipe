@@ -1,8 +1,9 @@
 {
   "manifest_version": 3,
-  "name": "Bookmark Swipe",
-  "version": "0.1.0",
-  "description": "Xのブックマークを、カードをスワイプして1枚ずつ整理します。",
+  "name": "__MSG_extName__",
+  "default_locale": "en",
+  "version": "0.2.0",
+  "description": "__MSG_extDescription__",
   "minimum_chrome_version": "111",
   "permissions": [
     "storage"
@@ -15,7 +16,7 @@
     "service_worker": "src/background.js"
   },
   "action": {
-    "default_title": "Bookmark Swipe: ブックマークをスワイプで整理",
+    "default_title": "__MSG_actionTitle__",
     "default_icon": {
       "16": "icons/icon16.png",
       "32": "icons/icon32.png",
@@ -50,6 +51,7 @@
         "src/parse.js",
         "src/physics.js",
         "src/queue.js",
+        "src/i18n.js",
         "src/overlay.js",
         "src/content.js"
       ],
