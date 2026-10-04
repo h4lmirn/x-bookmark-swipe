@@ -5,9 +5,10 @@
 A Chrome extension (Manifest V3) that lets you sort your X (Twitter) bookmarks one card at a time by swiping.
 
 ## Installation
-1. Open `chrome://extensions` and turn on "Developer mode" (top right)
-2. Click "Load unpacked" and choose this folder (`x-bookmark-swipe`)
-3. Open `https://x.com/i/history`
+1. Click "Code" (top right) → "Download ZIP", then unzip it
+2. Open `chrome://extensions` and turn on "Developer mode" (top right)
+3. Click "Load unpacked" and choose this folder (`x-bookmark-swipe`)
+4. Open `https://x.com/i/history`
 
 ## Usage
 Press the "Swipe to sort" button at the bottom center of the bookmarks page to start in full screen. Cards come up in shuffled order. The controls are shown with pictures and symbols, and the text switches between Japanese and English to match your browser language.
