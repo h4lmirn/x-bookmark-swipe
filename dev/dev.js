@@ -7,6 +7,7 @@
   var batch = Number(qs.get('batch') || 0);
   var noFolders = qs.get('folders') === '0';
   var noDelete = qs.get('nodelete') === '1';
+  var noReact = qs.get('noreact') === '1';
   var empty = qs.get('empty') === '1';
   var theme = qs.get('theme') || 'auto';
   var logEl = document.getElementById('log');
@@ -30,7 +31,7 @@
     clearReviewed: function () { reviewed = {}; localStorage.removeItem('xbs_dev_reviewed'); log('reviewed cleared'); },
     getSettings: function () { return Promise.resolve(settings); },
     setSettings: function (s) { settings = s; localStorage.setItem('xbs_dev_settings', JSON.stringify(s)); },
-    getCaps: function () { return sleep(300).then(function () { return { auth: true, delete: !noDelete, create: true, folder: true, unfolder: true }; }); },
+    getCaps: function () { return sleep(300).then(function () { return { auth: true, delete: !noDelete, create: true, folder: true, unfolder: true, favorite: !noReact, repost: !noReact }; }); },
     getFolders: function () { return ready.then(function () { return sleep(200); }).then(function () { return noFolders ? [] : data.folders; }); },
     start: function (sink) {
       var stopped = false;
@@ -49,13 +50,14 @@
       sleep(1500).then(function () { loading = false; if (adapter._sink === sink) deliver(sink, 10); });
     },
     commit: function (op) {
+      var nm = op.kind === 'like' ? (op.on ? 'FavoriteTweet' : 'UnfavoriteTweet') : op.kind === 'repost' ? (op.on ? 'CreateRetweet' : 'DeleteRetweet') : op.kind;
       return sleep(150 + Math.random() * 200).then(function () {
-        if (failRate && Math.random() < failRate) { log('FAIL ' + op.kind + ' ' + op.tweetId); throw new Error('mock failure'); }
-        log('OK   ' + op.kind + ' ' + op.tweetId + (op.folderName ? ' -> ' + op.folderName : ''));
+        if (failRate && Math.random() < failRate) { log('FAIL ' + nm + ' ' + op.tweetId); throw new Error('mock failure'); }
+        log('OK   ' + nm + ' ' + op.tweetId + (op.folderName ? ' -> ' + op.folderName : ''));
         return true;
       });
     },
-    flushSync: function (ops) { ops.forEach(function (o) { log('FLUSH ' + o.kind + ' ' + o.tweetId); }); }
+    flushSync: function (ops) { ops.forEach(function (o) { log('FLUSH ' + o.kind + (o.on != null ? (o.on ? '+' : '-') : '') + ' ' + o.tweetId); }); }
   };
   function deliver(sink, n) {
     var slice = data.items.slice(pos, pos + n); pos += slice.length;

@@ -41,6 +41,21 @@
 
   function fmtUrl(u) { return String(u || ''); }
 
+  // 動画の variants から video/mp4 を選ぶ。幅 1280px 以下の中でビットレート最大。なければ最小の mp4。
+  function pickVariant(vi) {
+    var list = (vi && Array.isArray(vi.variants) ? vi.variants : []).filter(function (v) {
+      return v && v.url && (v.content_type === 'video/mp4' || /\.mp4(\?|$)/.test(v.url));
+    }).map(function (v) {
+      var m = /\/(\d{2,4})x(\d{2,4})\//.exec(v.url);
+      return { url: String(v.url), bitrate: v.bitrate || 0, w: m ? +m[1] : 0, h: m ? +m[2] : 0 };
+    });
+    if (!list.length) return null;
+    var ok = list.filter(function (v) { return !v.w || v.w <= 1280; });
+    var pool = ok.length ? ok : list.sort(function (a, b) { return a.w - b.w; }).slice(0, 1);
+    pool.sort(function (a, b) { return b.bitrate - a.bitrate; });
+    return pool[0];
+  }
+
   function normalize(result, depth) {
     try {
       result = unwrap(result);
@@ -91,13 +106,19 @@
           repost: (leg.retweet_count || 0) + (leg.quote_count || 0),
           like: leg.favorite_count || 0
         },
+        favorited: !!leg.favorited, retweeted: !!leg.retweeted,
         url: 'https://x.com/' + (screen || 'i') + '/status/' + id
       };
       media.forEach(function (m) {
         if (!m || !m.media_url_https) return;
         var oi = m.original_info || {};
         var type = m.type === 'video' ? 'video' : m.type === 'animated_gif' ? 'gif' : 'photo';
-        out.media.push({ type: type, url: fmtUrl(m.media_url_https), w: oi.width || 0, h: oi.height || 0 });
+        var om = { type: type, url: fmtUrl(m.media_url_https), w: oi.width || 0, h: oi.height || 0 };
+        if (type !== 'photo') {
+          var pv = pickVariant(m.video_info);
+          if (pv) { om.src = pv.url; om.dur = (m.video_info && m.video_info.duration_millis) || 0; }
+        }
+        out.media.push(om);
       });
       if (!depth && result.quoted_status_result && result.quoted_status_result.result) {
         var q = normalize(result.quoted_status_result.result, 1);

@@ -27,8 +27,10 @@
     stack: dot(['M5 18.5v-9A1.5 1.5 0 016.5 8h11A1.5 1.5 0 0119 9.5v9a1.5 1.5 0 01-1.5 1.5h-11A1.5 1.5 0 015 18.5', 'M8 4.5h8'], 20),
     gear: ic('<path d="M4 7h9M17 7h3M4 17h3M11 17h9"/><circle cx="15" cy="7" r="2"/><circle cx="9" cy="17" r="2"/>'),
     reply: ic('<path d="M20 12a8 8 0 01-11.6 7.1L4 20l1-4.2A8 8 0 1120 12z"/>', 16),
-    repost: ic('<path d="M17 4l3 3-3 3M20 7H8a4 4 0 00-4 4v1M7 20l-3-3 3-3M4 17h12a4 4 0 004-4v-1"/>', 16),
-    like: ic('<path d="M12 20s-7-4.4-7-10a4 4 0 017-2.6A4 4 0 0119 10c0 5.6-7 10-7 10z"/>', 16),
+    repost: dot(['M17 4l3 3-3 3M20 7H8a4 4 0 00-4 4v1', 'M7 20l-3-3 3-3M4 17h12a4 4 0 004-4v-1'], 16),
+    like: dot(['M12 20s-7-4.4-7-10a4 4 0 017-2.6A4 4 0 0119 10c0 5.6-7 10-7 10z'], 16),
+    soundOff: dot(['M4.5 9.5h3l4-3.5v12l-4-3.5h-3z', 'M16 9.5l5 5', 'M21 9.5l-5 5'], 18),
+    soundOn: dot(['M4.5 9.5h3l4-3.5v12l-4-3.5h-3z', 'M15.5 9.5a4 4 0 010 5', 'M18.5 7a7.5 7.5 0 010 10'], 18),
     ext: ic('<path d="M8 16L16 8M9 8h7v7"/>', 14),
     play: '<svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor" aria-hidden="true"><path d="M9 6.5v11l9-5.5z"/></svg>',
     check: '<svg viewBox="0 0 64 64" width="96" height="96" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle class="ring" cx="32" cy="32" r="28"/><path class="tick" d="M19 33l9 9 17-19"/></svg>'
@@ -103,6 +105,11 @@
     '.play{position:absolute;inset:0;display:grid;place-items:center;pointer-events:none}',
     '.play i{width:52px;height:52px;border-radius:50%;background:rgba(0,0,0,.55);color:#fff;display:grid;place-items:center;backdrop-filter:blur(6px)}',
     '.gif{position:absolute;left:10px;bottom:10px;font-size:11px;font-weight:700;letter-spacing:.06em;color:#fff;background:rgba(0,0,0,.6);padding:2px 7px;border-radius:6px}',
+    '.media .vid{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;background:#000;opacity:0;pointer-events:none;transition:opacity .2s}',
+    '.media .started .vid{opacity:1}',
+    '.vtap{position:absolute;inset:0;width:100%;height:100%;border-radius:0}.vtap:focus-visible{outline-offset:-3px;border-radius:0}',
+    '.play{transition:opacity .15s}.playing .play{opacity:0}',
+    '.vmute{position:absolute;right:10px;bottom:10px;width:32px;height:32px;border-radius:50%;display:grid;place-items:center;color:#fff;background:rgba(0,0,0,.6)}',
     '.hero .media.n1{max-height:480px}',
     '.media.fill{flex:1 1 0;min-height:140px;max-height:none;aspect-ratio:auto!important}',
     '.body.solo{justify-content:center;padding-bottom:24px}',
@@ -115,6 +122,13 @@
     '.quote .media{border-radius:10px;max-height:180px}',
     '.foot{flex:none;display:flex;align-items:center;gap:16px;padding-top:12px;margin-top:auto;font-size:13px;color:var(--sub);font-variant-numeric:tabular-nums}',
     '.foot .m{display:inline-flex;align-items:center;gap:5px}',
+    '.foot .rx{display:inline-flex;align-items:center;gap:5px;padding:6px 8px;margin:-6px -8px;border-radius:10px;font-size:13px;font-variant-numeric:tabular-nums;transition:color .15s}',
+    '.foot .rx:hover{color:var(--ink)}',
+    '.foot .rx svg{transform-origin:center}',
+    '.foot .rx[aria-pressed=true] svg path{stroke-dasharray:none}',
+    '.foot .rx[data-r=like][aria-pressed=true]{color:var(--remove)}.foot .rx[data-r=like][aria-pressed=true] svg path{fill:currentColor}',
+    '.foot .rx[data-r=repost][aria-pressed=true]{color:var(--keep)}.foot .rx[data-r=repost][aria-pressed=true] svg path{stroke-width:2.4}',
+    '.foot .rx[aria-disabled=true]{opacity:.4;cursor:not-allowed}',
     '.foot .open{margin-left:auto;display:inline-flex;align-items:center;gap:3px;color:var(--sub);text-decoration:none;padding:4px 2px}',
     '.foot .open:hover{color:var(--ink)}',
     /* skeleton */
@@ -180,7 +194,7 @@
     '@media (max-width:560px){.head{grid-template-columns:auto 1fr auto;padding:10px 10px 12px 14px;gap:6px}.count{font-size:44px}.h-right{gap:2px}.results{margin-right:2px;font-size:12px}.endbtn{padding:0 8px 0 4px}.actions{gap:10px}.act{width:56px}.cbtn{width:54px;height:54px}}',
     '@media (pointer:coarse){.act .hint{display:none}.cbtn.small{margin-top:5px}}',
     '@media (max-height:560px){.count{font-size:40px}.act .hint{display:none}.cbtn{width:50px;height:50px}.toast{top:84px}}',
-    '@media (prefers-reduced-motion:reduce){.tint,.bar>i,.toast,.sheet,.scrim,.settings,.done,.cbtn,.ibtn,.chip{transition-duration:.01ms!important}.skeleton{animation:none}.done .ring,.done .tick{animation-duration:.01ms!important}}'
+    '@media (prefers-reduced-motion:reduce){.tint,.bar>i,.toast,.sheet,.scrim,.settings,.done,.cbtn,.ibtn,.chip,.media .vid,.play,.foot .rx{transition-duration:.01ms!important}.skeleton{animation:none}.done .ring,.done .tick{animation-duration:.01ms!important}}'
   ].join('\n');
 
   function template() { return [
@@ -301,11 +315,12 @@
     var queue = new XBS.CommitQueue({
       send: function (op, o) { return adapter.commit(op, o || {}); },
       sendUrgent: function (ops) { adapter.flushSync(ops); },
-      onFail: onCommitFail
+      onFail: onCommitFail,
+      onSent: function (op) { if (op.kind === 'like' || op.kind === 'repost') onReactSent(op); }
     });
 
     /* ------------------------------------------------------------ card DOM */
-    function mediaBlock(list, hero) {
+    function mediaBlock(list, hero, vids) {
       var n = Math.min(list.length, 4);
       var box = el('div', 'media n' + n);
       if (n === 1 && list[0].w && list[0].h) {
@@ -315,13 +330,90 @@
         var m = list[i], cell = el('div');
         var img = el('img'); img.src = m.url; img.alt = ''; img.draggable = false; img.decoding = 'async';
         cell.appendChild(img);
+        var vd = null;
+        if (m.type !== 'photo' && vids && m.src) vd = makeVid(m, cell, vids);
         if (m.type !== 'photo') {
           var pl = el('div', 'play'); pl.innerHTML = '<i>' + ICON.play + '</i>'; cell.appendChild(pl);
           if (m.type === 'gif') cell.appendChild(el('span', 'gif', 'GIF'));
+          if (vd && vd.mute) cell.appendChild(vd.mute);
         }
         box.appendChild(cell);
       }
       return box;
+    }
+    /* 動画・GIF：src は表示中（いちばん上）になるまで付けない。GIF は自動再生、動画はタップで再生。 */
+    function makeVid(m, cell, vids) {
+      var isGif = m.type === 'gif';
+      var v = { m: m, cell: cell, isGif: isGif, loaded: false, muted: true, vid: null, tap: null, mute: null };
+      var vid = el('video', 'vid');
+      vid.setAttribute('playsinline', ''); vid.playsInline = true;
+      vid.preload = 'none'; vid.muted = true; vid.poster = m.url; vid.tabIndex = -1;
+      vid.setAttribute('aria-hidden', 'true'); vid.disablePictureInPicture = true;
+      if (isGif) vid.loop = true;
+      v.vid = vid; cell.appendChild(vid);
+      if (!isGif || reduced()) {   // GIF は reduced-motion のときだけ手動再生にする
+        var tap = el('button', 'vtap'); tap.type = 'button'; tap.dataset.nodrag = '1';
+        tap.setAttribute('aria-label', t('playVideo'));
+        v.tap = tap; cell.appendChild(tap);
+        tap.addEventListener('click', function () {
+          if (v.loaded && !vid.paused && !vid.ended) vid.pause();
+          else vidStart(v);
+        });
+      }
+      if (!isGif) {
+        var mu = el('button', 'vmute'); mu.type = 'button'; mu.dataset.nodrag = '1';
+        mu.innerHTML = ICON.soundOff; mu.setAttribute('aria-label', t('unmuteVideo')); mu.setAttribute('aria-pressed', 'false');
+        mu.addEventListener('click', function () {
+          v.muted = !v.muted; vid.muted = v.muted;
+          mu.innerHTML = v.muted ? ICON.soundOff : ICON.soundOn;
+          mu.setAttribute('aria-label', v.muted ? t('unmuteVideo') : t('muteVideo'));
+          mu.setAttribute('aria-pressed', String(!v.muted));
+        });
+        v.mute = mu;
+      }
+      function ui(playing) {
+        cell.classList.toggle('playing', playing);
+        if (playing) cell.classList.add('started');
+        if (v.tap) v.tap.setAttribute('aria-label', playing ? t('pauseVideo') : t('playVideo'));
+      }
+      vid.addEventListener('playing', function () { ui(true); });
+      vid.addEventListener('pause', function () { if (v.loaded) ui(false); });
+      vid.addEventListener('ended', function () { ui(false); });
+      vid.addEventListener('error', function () { if (v.loaded) vidFail(v); });
+      vids.push(v);
+      return v;
+    }
+    function vidStart(v) {
+      var vid = v.vid;
+      if (!v.loaded) { vid.src = v.m.src; v.loaded = true; }
+      else if (vid.ended) vid.currentTime = 0;
+      vid.muted = v.muted;
+      var pr = vid.play();
+      if (pr && pr.catch) pr.catch(function (e) { if (e && e.name === 'AbortError') return; if (v.loaded) vidFail(v); });
+    }
+    function vidStop(v) {
+      var vid = v.vid;
+      try { vid.pause(); } catch (e) { /* ignore */ }
+      if (v.loaded) { v.loaded = false; vid.removeAttribute('src'); try { vid.load(); } catch (e) { /* ignore */ } }
+      v.cell.classList.remove('playing'); v.cell.classList.remove('started');
+      if (v.tap) v.tap.setAttribute('aria-label', t('playVideo'));
+    }
+    function vidFail(v) {
+      vidStop(v);
+      var card = v.card;
+      if (card && !card.vidWarned) { card.vidWarned = true; toast(t('videoFailed'), { ms: 5000 }); }
+    }
+    // 表示中のカードだけ再生する。外れたら止めて src を外す
+    function mediaActive(card, on) {
+      if (!card || !card.vids || !card.vids.length) return;
+      if (on) {
+        if (card.mediaOn) return;
+        card.mediaOn = true;
+        card.vids.forEach(function (v) { if (v.isGif && !reduced()) vidStart(v); });
+      } else if (card.mediaOn) {
+        card.mediaOn = false;
+        card.vids.forEach(vidStop);
+      }
     }
     function textBlock(text, cls) {
       var p = el('p', 'text ' + (cls || 'clamp'));
@@ -359,7 +451,8 @@
         more.setAttribute('aria-expanded', 'false');
         body.appendChild(more);
       }
-      if (item.media.length) { var mb = mediaBlock(item.media, hero); mb.classList.add('fill'); body.appendChild(mb); }
+      var vids = [];
+      if (item.media.length) { var mb = mediaBlock(item.media, hero, vids); mb.classList.add('fill'); body.appendChild(mb); }
       else if (!item.quote && item.text && item.text.length <= 220) {
         var len = item.text.length;
         body.classList.add('solo');
@@ -372,16 +465,22 @@
         qh.appendChild(qa); qh.appendChild(el('b', '', q.name || q.screen)); qh.appendChild(el('span', '', '@' + q.screen));
         qb.appendChild(qh);
         if (q.text) qb.appendChild(textBlock(q.text, 'clamp'));
-        if (q.media.length) qb.appendChild(mediaBlock(q.media.slice(0, 1)));
+        if (q.media.length) qb.appendChild(mediaBlock(q.media.slice(0, 1), false, null));
         body.appendChild(qb);
       }
       face.appendChild(body);
 
       var foot = el('div', 'foot');
-      [['reply', item.counts.reply], ['repost', item.counts.repost], ['like', item.counts.like]].forEach(function (x) {
-        var m = el('span', 'm'); m.innerHTML = ICON[x[0]]; m.appendChild(el('span', '', fmtCount(x[1])));
-        m.setAttribute('aria-label', t(x[0]) + ' ' + x[1]);
-        foot.appendChild(m);
+      var rx = {};
+      var rp = el('span', 'm'); rp.innerHTML = ICON.reply; rp.appendChild(el('span', '', fmtCount(item.counts.reply)));
+      rp.setAttribute('aria-label', t('reply') + ' ' + item.counts.reply);
+      foot.appendChild(rp);
+      [['repost', 'repostKey'], ['like', 'likeKey']].forEach(function (x) {
+        var b = el('button', 'rx'); b.type = 'button'; b.dataset.r = x[0]; b.dataset.nodrag = '1';
+        b.title = t(x[1]); b.innerHTML = ICON[x[0]];
+        var num = el('span', '', ''); b.appendChild(num);
+        b.addEventListener('click', function () { toggleReact(x[0], cards.get(item.id)); });
+        foot.appendChild(b); rx[x[0]] = { btn: b, num: num };
       });
       var open = el('a', 'open'); open.href = item.url; open.target = '_blank'; open.rel = 'noopener noreferrer';
       open.dataset.nodrag = '1'; open.setAttribute('aria-label', t('openXLabel'));
@@ -391,8 +490,11 @@
       var card = {
         id: item.id, item: item, el: c, lift: lift, melt: melt, veil: veil, stamps: stamps, body: body,
         p: { x: 0, y: 0, r: 0, s: 1, o: 1, m: 0 }, d: 3,
+        rx: rx, vids: vids, mediaOn: false,
         crossed: {}, stampVal: {}, locked: false, w: 440, h: 500, anim: null, depthAnim: null, flyHandle: null
       };
+      vids.forEach(function (v) { v.card = card; });
+      paintReact(card);
       if (more) {
         more.addEventListener('click', function () {
           var ex = body.classList.toggle('expanded');
@@ -405,6 +507,59 @@
         };
       }
       return card;
+    }
+
+    /* ---- いいね・リポスト（楽観的更新・即送信・取り消し対象外） ---- */
+    function reactOk(kind) { return kind === 'like' ? caps.favorite !== false : caps.repost !== false; }
+    function paintReact(card) {
+      if (!card || !card.rx) return;
+      var it = card.item;
+      ['like', 'repost'].forEach(function (k) {
+        var r = card.rx[k], on = k === 'like' ? it.favorited : it.retweeted;
+        r.btn.setAttribute('aria-pressed', on ? 'true' : 'false');
+        r.btn.setAttribute('aria-disabled', reactOk(k) ? 'false' : 'true');
+        r.btn.setAttribute('aria-label', t(k === 'like' ? 'likeLabel' : 'repostLabel') + ' ' + it.counts[k]);
+        var txt = fmtCount(it.counts[k]);
+        if (r.num.textContent !== txt) r.num.textContent = txt;
+      });
+    }
+    function toggleReact(kind, card) {
+      card = card || topCard();
+      if (destroyed || ui.modal || ui.done || !card) return false;
+      if (!reactOk(kind)) { toast(t('needReact'), { ms: 5000 }); return false; }
+      var it = card.item, isLike = kind === 'like';
+      if (!it._srv) it._srv = { like: !!it.favorited, repost: !!it.retweeted };
+      var on = !(isLike ? it.favorited : it.retweeted);
+      if (isLike) it.favorited = on; else it.retweeted = on;
+      it.counts[kind] = Math.max(0, it.counts[kind] + (on ? 1 : -1));
+      var pend = null;
+      queue.ops.forEach(function (o) { if (o.state === 'pending' && o.kind === kind && o.tweetId === it.id) pend = o; });
+      if (!(pend && queue.cancel(pend))) queue.add({ kind: kind, tweetId: it.id, on: on }, { delay: 0 });
+      paintReact(card);
+      if (!reduced()) {
+        var ico = card.rx[kind].btn.querySelector('svg');
+        try { ico.animate([{ transform: 'scale(1)' }, { transform: 'scale(1.25)' }, { transform: 'scale(1)' }], { duration: 260, easing: 'cubic-bezier(.2,.9,.3,1.3)' }); } catch (e) { /* ignore */ }
+      }
+      return true;
+    }
+    function onReactSent(op) {
+      var it = byId.get(op.tweetId);
+      if (it && it._srv) it._srv[op.kind] = !!op.on;
+    }
+    function onReactFail(op, err) {
+      var it = byId.get(op.tweetId); if (!it) return;
+      var later = queue.ops.some(function (o) { return o.kind === op.kind && o.tweetId === op.tweetId; });
+      if (!later && it._srv) {
+        var srv = it._srv[op.kind], isLike = op.kind === 'like', cur = isLike ? it.favorited : it.retweeted;
+        if (cur !== srv) {
+          if (isLike) it.favorited = srv; else it.retweeted = srv;
+          it.counts[op.kind] = Math.max(0, it.counts[op.kind] + (srv ? 1 : -1));
+        }
+        paintReact(cards.get(it.id));
+        leaving.forEach(function (c) { if (c.item === it) paintReact(c); });
+      }
+      var key = op.kind === 'like' ? (op.on ? 'msgLikeFailed' : 'msgUnlikeFailed') : (op.on ? 'msgRepostFailed' : 'msgUnrepostFailed');
+      toast(t(key) + (err && err.message ? (I18N.lang === 'ja' ? '（' + err.message + '）' : ' (' + err.message + ')') : ''), { ms: 4500 });
     }
 
     function render(card) {
@@ -502,6 +657,7 @@
         c.el.style.pointerEvents = i === 0 ? '' : 'none';
         c.el.setAttribute('aria-hidden', i === 0 ? 'false' : 'true');
         if (i > 0) c.el.setAttribute('inert', ''); else c.el.removeAttribute('inert');
+        mediaActive(c, i === 0);
         if (c.d !== i) {
           if (c.depthAnim) c.depthAnim.cancel();
           if (reduced()) { c.d = i; render(c); }
@@ -512,6 +668,7 @@
         if (!keep.has(id)) {
           if (c.anim) c.anim.cancel();
           if (c.depthAnim) c.depthAnim.cancel();
+          mediaActive(c, false);
           c.el.remove(); cards.delete(id);
         }
       });
@@ -564,6 +721,7 @@
       setDisabled(btn.remove, !caps.delete, t('noDelete'));
       setDisabled(btn.folder, !folderEnabled(), foldersReady ? (folders.length ? '' : t('noFolders')) : t('foldersLoading'));
       setDisabled(btn.undo, history.length === 0);
+      cards.forEach(paintReact);
       setDisabled(btn.keep, false); setDisabled(btn.later, false);
       toastUndo.disabled = history.length === 0;
       var empty = deck.length === 0 && leaving.size === 0;
@@ -705,6 +863,7 @@
 
     function commit(kind, card, o) {
       var item = card.item;
+      mediaActive(card, false);
       settle(card); bake(card);
       deck.shift();
       cards.delete(item.id);
@@ -762,7 +921,7 @@
     /* 逆再生：退場した位置から、ばねで中央へ戻ってくる */
     function bringBack(item, pose) {
       var old = cards.get(item.id);
-      if (old) { old.el.remove(); cards.delete(item.id); }
+      if (old) { mediaActive(old, false); old.el.remove(); cards.delete(item.id); }
       deck.unshift(item);
       sync();
       var card = cards.get(item.id);
@@ -775,16 +934,17 @@
         return;
       }
       card.p.x = pose.x; card.p.y = pose.y; card.p.r = pose.r; card.p.s = pose.s; card.p.o = 0; card.p.m = pose.m || 0;
+      card.locked = true;   // 戻ってくる間はスタンプを出さない（先に付けると最初の1コマで出たまま残る）
       render(card);
-      card.locked = true;
       card.anim = spring(card.p, { x: 0, y: 0, r: 0, s: 1, o: 1, m: 0 }, {
         stiffness: 260, damping: 25,
         onUpdate: function () { render(card); },
-        onDone: function () { card.anim = null; card.locked = false; }
+        onDone: function () { card.anim = null; card.locked = false; render(card); clearTints(); }
       });
     }
     function onCommitFail(op, err) {
       if (destroyed) return;
+      if (op.kind === 'like' || op.kind === 'repost') { onReactFail(op, err); return; }
       if (op.inverse) { toast(t('msgUndoFailed'), { ms: 4500 }); return; }
       var ix = -1;
       for (var i = history.length - 1; i >= 0; i--) if (history[i].op === op) { ix = i; break; }
@@ -1021,6 +1181,8 @@
       else if (k === 'ArrowRight' || k === 'k' || k === 'K') { if (!e.repeat) act('keep'); }
       else if (k === 'ArrowUp' || k === 'f' || k === 'F') { if (!e.repeat) act('folder'); }
       else if (k === 'ArrowDown' || k === 's' || k === 'S') { if (!e.repeat) act('later'); }
+      else if (k === 'l' || k === 'L') { if (!e.repeat) toggleReact('like'); }
+      else if (k === 'r' || k === 'R') { if (!e.repeat) toggleReact('repost'); }
       else if (k === ' ' || k === 'o' || k === 'O') {
         if (!e.repeat && deck[0]) G.open(deck[0].url, '_blank', 'noopener,noreferrer');
       } else handled = false;
@@ -1050,6 +1212,8 @@
       if (mqDark && mqDark.removeEventListener) mqDark.removeEventListener('change', applyTheme);
       if (ro) ro.disconnect();
       clearTimeout(toastTimer); clearTimeout(tintTimer);
+      cards.forEach(function (c) { mediaActive(c, false); });
+      leaving.forEach(function (c) { mediaActive(c, false); });
       if (stopFeed) stopFeed();
       queue.destroy();
       host.remove();

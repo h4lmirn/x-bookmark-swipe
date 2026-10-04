@@ -21,9 +21,12 @@ As you move a card, a round stamp for that direction (remove 👋, keep 🤝, fo
 | Folder | Up | ↑ / F | Choose a folder (number keys 1–9, Esc to go back) |
 | Later | Down | ↓ / S | Puts it back at a random position in the deck |
 | Undo | Toast / bottom button | Z / ⌘Z | As many times as you like |
+| Like | Heart at the bottom of the card | L | Press again to undo (not part of Undo / Z) |
+| Repost | Repost icon at the bottom of the card | R | Press again to undo (not part of Undo / Z) |
 | Open on X | Link on the card | Space / O | New tab |
 | Done | "× Done" at the top right | Esc | Pending actions are sent right away when you close |
 
+- Videos and GIFs play inline. A GIF autoplays only while its card is on top; a video plays or pauses when you tap it (muted at first, with a speaker button at the bottom right). If one cannot play, use "Open on X".
 - The top right shows your results as `👋 24  🤝 51` (removed count, kept count).
 - The `+` in the remaining count, such as "132+", means the bookmarks are still loading (the page is auto-scrolled in the background to load them).
 - In Settings (the slider icon at the top right) you can show reviewed bookmarks again and reset your records.

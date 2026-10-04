@@ -67,6 +67,12 @@
   window.addEventListener('pagehide', function () { if (reviewedMap) storageSet(KEY_R, reviewedMap); });
 
   /* ---------------- adapter ---------------- */
+  var OP_NAMES = { remove: 'DeleteBookmark', restore: 'CreateBookmark', folder: 'AddToFolder', unfolder: 'RemoveFromFolder' };
+  function opName(o) {
+    if (o.kind === 'like') return o.on ? 'FavoriteTweet' : 'UnfavoriteTweet';
+    if (o.kind === 'repost') return o.on ? 'CreateRetweet' : 'DeleteRetweet';
+    return OP_NAMES[o.kind];
+  }
   var loading = false;
   var adapter = {
     getReviewed: function () { return loadReviewed().then(function (m) { return Object.keys(m); }); },
@@ -107,12 +113,10 @@
       })();
     },
     commit: function (op, o) {
-      var map = { remove: 'DeleteBookmark', restore: 'CreateBookmark', folder: 'AddToFolder', unfolder: 'RemoveFromFolder' };
-      return rpc('mutate', { op: map[op.kind], tweetId: op.tweetId, folderId: op.folderId }, 45000).then(function () { return true; });
+      return rpc('mutate', { op: opName(op), tweetId: op.tweetId, folderId: op.folderId }, 45000).then(function () { return true; });
     },
     flushSync: function (ops) {
-      var map = { remove: 'DeleteBookmark', restore: 'CreateBookmark', folder: 'AddToFolder', unfolder: 'RemoveFromFolder' };
-      var list = ops.map(function (o) { return { op: map[o.kind], tweetId: o.tweetId, folderId: o.folderId }; });
+      var list = ops.map(function (o) { return { op: opName(o), tweetId: o.tweetId, folderId: o.folderId, on: o.on }; });
       try { window.dispatchEvent(new CustomEvent('xbs:flush', { detail: JSON.stringify(list) })); } catch (e) { /* ignore */ }
     }
   };

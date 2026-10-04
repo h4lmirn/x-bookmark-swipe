@@ -9,6 +9,8 @@
   var GQL_RE = /\/i\/api\/graphql\/([\w-]+)\/(\w+)/;
   var WATCH = { Bookmarks: 1, BookmarkFoldersSlice: 1, BookmarkFolderTimeline: 1 };
   var WANT = ['deletebookmark', 'createbookmark', 'bookmarktweettofolder', 'removetweetfrombookmarkfolder', 'bookmarkfoldersslice'];
+  var REACT = ['favoritetweet', 'unfavoritetweet', 'createretweet', 'deleteretweet'];
+  WANT = WANT.concat(REACT);
   var KEEP_HEADERS = ['authorization', 'x-twitter-auth-type', 'x-twitter-active-user', 'x-twitter-client-language', 'x-csrf-token'];
   var LS_KEY = 'xbs:qids:v1';
 
@@ -258,6 +260,7 @@
 
   async function caps() {
     await ensureQids(WANT.slice(0, 4));
+    await ensureQids(REACT);
     var has = function (k) { return state.qids.has(k); };
     var auth = !!(buildHeaders().authorization);
     return {
@@ -265,13 +268,19 @@
       delete: auth && has('deletebookmark'),
       create: auth && has('createbookmark'),
       folder: auth && has('bookmarktweettofolder'),
-      unfolder: auth && has('removetweetfrombookmarkfolder')
+      unfolder: auth && has('removetweetfrombookmarkfolder'),
+      favorite: auth && has('favoritetweet') && has('unfavoritetweet'),
+      repost: auth && has('createretweet') && has('deleteretweet')
     };
   }
 
   var OPS = {
     DeleteBookmark: function (a) { return mutate('DeleteBookmark', { tweet_id: a.tweetId }, a); },
     CreateBookmark: function (a) { return mutate('CreateBookmark', { tweet_id: a.tweetId }, a); },
+    FavoriteTweet: function (a) { return mutate('FavoriteTweet', { tweet_id: a.tweetId }, a); },
+    UnfavoriteTweet: function (a) { return mutate('UnfavoriteTweet', { tweet_id: a.tweetId }, a); },
+    CreateRetweet: function (a) { return mutate('CreateRetweet', { tweet_id: a.tweetId, dark_request: false }, a); },
+    DeleteRetweet: function (a) { return mutate('DeleteRetweet', { source_tweet_id: a.tweetId }, a); },
     AddToFolder: function (a) { return mutate('bookmarkTweetToFolder', { tweet_id: a.tweetId, bookmark_collection_id: a.folderId }, a); },
     RemoveFromFolder: function (a) { return mutate('RemoveTweetFromBookmarkFolder', { tweet_id: a.tweetId, bookmark_collection_id: a.folderId }, a); }
   };
