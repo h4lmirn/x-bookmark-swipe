@@ -142,7 +142,7 @@
     /* folder sheet */
     '.scrim{position:absolute;inset:0;z-index:30;background:rgba(0,0,0,.18);opacity:0;pointer-events:none;transition:opacity .22s}',
     '.scrim.show{opacity:1;pointer-events:auto}',
-    '.sheet{position:absolute;z-index:31;left:0;right:0;bottom:0;margin:0 auto;width:min(560px,100%);padding:18px 18px calc(20px + env(safe-area-inset-bottom,0px));background:var(--card);border-radius:24px 24px 0 0;box-shadow:0 -10px 40px rgba(0,0,0,.18);transform:translateY(105%);transition:transform .34s cubic-bezier(.2,.9,.3,1)}',
+    '.sheet{position:absolute;z-index:31;left:0;right:0;bottom:0;margin:0 auto;width:min(560px,100%);padding:18px 18px calc(20px + env(safe-area-inset-bottom,0px));background:var(--card);border-radius:24px 24px 0 0;box-shadow:0 -10px 40px rgba(0,0,0,.18);transform:translateY(calc(100% + 60px));transition:transform .34s cubic-bezier(.2,.9,.3,1)}',
     '.sheet.show{transform:none}',
     '.sheet h2{margin:0 0 12px;font-size:14px;font-weight:600;color:var(--sub);letter-spacing:.04em;display:flex;align-items:center;gap:8px}.sheet h2 svg{color:var(--folder)}',
     '.chips{display:flex;flex-wrap:wrap;gap:8px;max-height:30vh;overflow-y:auto}',
@@ -176,6 +176,9 @@
     '.pill{padding:11px 22px;border-radius:999px;background:var(--ink);color:var(--desk);font-size:15px;font-weight:600}',
     '.pill.ghost{background:var(--chip);color:var(--ink)}',
     '.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}',
+    '.endbtn{white-space:nowrap}',
+    '@media (max-width:560px){.head{grid-template-columns:auto 1fr auto;padding:10px 10px 12px 14px;gap:6px}.count{font-size:44px}.h-right{gap:2px}.results{margin-right:2px;font-size:12px}.endbtn{padding:0 8px 0 4px}.actions{gap:10px}.act{width:56px}.cbtn{width:54px;height:54px}}',
+    '@media (pointer:coarse){.act .hint{display:none}.cbtn.small{margin-top:5px}}',
     '@media (max-height:560px){.count{font-size:40px}.act .hint{display:none}.cbtn{width:50px;height:50px}.toast{top:84px}}',
     '@media (prefers-reduced-motion:reduce){.tint,.bar>i,.toast,.sheet,.scrim,.settings,.done,.cbtn,.ibtn,.chip{transition-duration:.01ms!important}.skeleton{animation:none}.done .ring,.done .tick{animation-duration:.01ms!important}}'
   ].join('\n');

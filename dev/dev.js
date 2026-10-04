@@ -75,4 +75,19 @@
     if (e.shiftKey && (e.key === 'T') && ctrl) { theme = document.querySelector('#xbs-overlay-host').shadowRoot.querySelector('.root').dataset.theme === 'dark' ? 'light' : 'dark'; ctrl.setTheme(theme); }
   }, true);
   open();
+
+  // ストア用スクリーンショットの状態を作る（?shot=keep|remove|folder|done）
+  var shot = qs.get('shot');
+  if (shot) setTimeout(function () {
+    var root = document.querySelector('#xbs-overlay-host').shadowRoot;
+    var key = function (k) { window.dispatchEvent(new KeyboardEvent('keydown', { key: k, bubbles: true })); };
+    if (shot === 'keep' || shot === 'remove') {
+      var d = shot === 'keep' ? 'right' : 'left', sx = shot === 'keep' ? 1 : -1;
+      var cards = [].slice.call(root.querySelectorAll('.card')).sort(function (a, b) { return b.style.zIndex - a.style.zIndex; });
+      cards[0].style.setProperty('transform', 'translate(' + (90 * sx) + 'px,-14px) rotate(' + (6 * sx) + 'deg) scale(1.02)', 'important');
+      cards[0].querySelector('.stamp[data-d=' + d + ']').style.opacity = 1;
+      root.querySelector('.tint[data-d=' + d + ']') && (root.querySelector('.tint[data-d=' + d + ']').style.opacity = .12);
+    } else if (shot === 'folder') key('ArrowUp');
+    else if (shot === 'done') { for (var i = 0; i < 40; i++) setTimeout(function () { key(Math.random() < .4 ? 'ArrowLeft' : 'ArrowRight'); }, i * 30); }
+  }, 2500);
 })();
